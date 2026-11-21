@@ -61,7 +61,16 @@ void Bowling_Frame::update_scores()
 		score1_ = dist10(rng);
 		roll_one_ = true;
 
-		if(score1_ == 10) strike_ = true; 
+		if(score1_ == 10) strike_ = true;
+
+		 if (frame_num_ == 10 && spare_){
+			score2_= dist10(rng);
+			const int roll_three_ = dist10(rng);
+			roll_two_ = true;
+			frame_score_ = score1_ + score2_ + roll_three_;
+
+			return;
+		 }
 	}
 	else if ( !strike_ && !roll_two_ ) 	
 	{
@@ -70,10 +79,50 @@ void Bowling_Frame::update_scores()
 		roll_two_ = true;
 
 		if ((score1_ + score2_) == 10) spare_ = true;
-	}
-	else if (next_frame_) 	next_frame_->update_scores();
 
-	frame_score_ = score1_ + score2_;
+		if (frame_num_ == 10 && spare_)
+		{
+			const int bonus_roll = distX(rng); 
+			frame_score_ = score1_ + score2_ + bonus_roll;
+
+			return;
+		}
+	}
+
+		if (next_frame_ && (strike_ || roll_two_))
+        next_frame_->update_scores();
+
+		frame_score_ = score1_ + score2_;
+
+		if (frame_num_ < 10 && next_frame_)
+    	{
+			if (strike_)
+			{
+				frame_score_ += next_frame_->score1();
+
+				if (next_frame_->strike() && next_frame_->next_frame_)
+					frame_score_ += next_frame_->next_frame_->score1();
+				else
+					frame_score_ += next_frame_->score2();
+			}
+				else if (spare_)
+				{
+					frame_score_ += next_frame_->score1();
+				}
+    	}
+
+	if (prev_frame_ == nullptr)
+    {
+        int running_total = 0;
+
+        for (Bowling_Frame* frame = this; frame; frame = frame->next_frame_)
+        {
+            running_total += frame->frame_score_;
+            frame->total_score_ = running_total;
+        }
+    }
+
+
 }
 
 
