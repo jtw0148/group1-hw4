@@ -12,7 +12,6 @@ int current_game_total(Bowling_Frame * first_frame)
 {
 	Bowling_Frame * temp = first_frame;
 	int game_total = 0;
-	int temp_total = 0;
 	while(temp)
 	{
 		game_total += temp->frame_score();
@@ -24,13 +23,13 @@ int current_game_total(Bowling_Frame * first_frame)
 int main(int argc, char** argv)
 {
   int players;
-  if(argc > 1){
+  if(argc > 2){
     std::cout << "too many arguments\n";
     return 1;
   }
 
   try {
-    players = std::stoi(argv[0]);
+    players = std::stoi(argv[1]);
   } catch (const std::invalid_argument&) {
     std::cout << "something went wrong. try again\n";
     return 1;
@@ -41,15 +40,17 @@ int main(int argc, char** argv)
   for(int i = 0; i< players; i++) {
     frames[i] = new Bowling_Frame(1);
     Bowling_Frame* temp = frames[i];
+    Bowling_Frame* prev = nullptr;
     for(int j = 2; j< 11; j++) { // set frames 2 - 10
       temp->next_frame(new Bowling_Frame(j));
+      prev = temp;
       temp = temp->next_frame();
     }
   }
 
   // play the game
   for(int i = 0; i< players; i++) {
-    frames[i] = new Bowling_Frame(1);
+    std::cout << "--------------------------NEW PLAYER------------------------------\n";
     Bowling_Frame* temp = frames[i];
     for(int j = 0; j< 10; j++) { // play 10 frames
       temp->update_scores();
@@ -58,6 +59,8 @@ int main(int argc, char** argv)
         << " Score 2: " << temp->score2() << endl;
       temp = temp->next_frame();
     }
+    cout << "Total Score: " << current_game_total(frames[i]) << endl;
   }
   return 0;
 }
+
